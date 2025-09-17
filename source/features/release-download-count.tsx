@@ -64,42 +64,41 @@ async function addCounts(assetsList: HTMLElement): Promise<void> {
 
 	const assets = await getAssetsForTag([releaseName]);
 
-	// TODO: Use batchedFunction instead
-	const releases = [[releaseName, assetsList]] as const;
-	for (const [name, release] of releases) {
-		const downloadCounts = new Map(assets[api.escapeKey(name)].map(asset => [asset.name, asset.downloadCount]));
-		const calculateHeatIndex = createHeatIndexFunction([...downloadCounts.values()]);
-		for (const assetName of select.all('.octicon-package ~ a .text-bold', release)) {
-			// Match the asset in the DOM to the asset in the API response
-			const downloadCount = downloadCounts.get(assetName.textContent!);
-			if (!downloadCount) {
-				continue;
-			}
+	const name = releaseName;
+	const release = assetsList;
 
-			// Place next to asset size
-			const assetSize = assetName
-				.closest('.Box-row')!
-				.querySelector(':scope > .flex-justify-end > :first-child')!;
-
-			assetSize.parentElement!.classList.add('rgh-release-download-count');
-
-			const classes = new Set(assetSize.classList);
-			classes.delete('text-sm-left');
-			classes.add('text-right');
-			classes.add('no-wrap');
-			classes.add('ml-auto');
-			classes.add('mr-sm-2');
-
-			assetSize.before(
-				<small
-					className={[...classes].join(' ')}
-					title={`${downloadCount} downloads`}
-					data-rgh-heat={calculateHeatIndex(downloadCount)}
-				>
-					{abbreviateNumber(downloadCount)} <DownloadIcon/>
-				</small>,
-			);
+	const downloadCounts = new Map(assets[api.escapeKey(name)].map(asset => [asset.name, asset.downloadCount]));
+	const calculateHeatIndex = createHeatIndexFunction([...downloadCounts.values()]);
+	for (const assetName of select.all('.octicon-package ~ a .text-bold', release)) {
+		// Match the asset in the DOM to the asset in the API response
+		const downloadCount = downloadCounts.get(assetName.textContent!);
+		if (!downloadCount) {
+			continue;
 		}
+
+		// Place next to asset size
+		const assetSize = assetName
+			.closest('.Box-row')!
+			.querySelector(':scope > .flex-justify-end > :first-child')!;
+
+		assetSize.parentElement!.classList.add('rgh-release-download-count');
+
+		const classes = new Set(assetSize.classList);
+		classes.delete('text-sm-left');
+		classes.add('text-right');
+		classes.add('no-wrap');
+		classes.add('ml-auto');
+		classes.add('mr-sm-2');
+
+		assetSize.before(
+			<small
+				className={[...classes].join(' ')}
+				title={`${downloadCount} downloads`}
+				data-rgh-heat={calculateHeatIndex(downloadCount)}
+			>
+				{abbreviateNumber(downloadCount)} <DownloadIcon/>
+			</small>,
+		);
 	}
 }
 
